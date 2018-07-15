@@ -74,9 +74,9 @@ public class CityKingsTime {
 
         //display
         if (uHour > CKSTOPTIME && uHour <= CKSTARTTIME) {
-            return "DO NOT START CK! The gang is asleep! Wait for " + startHours + " hours, " + minutes + " minutes, " + seconds + " seconds.";
+            return "DO NOT START CK! Our gang is asleep. If you start now our odds of Instant Victory are greatly reduced.  Wait for " + startHours + " hours, " + minutes + " minutes, " + seconds + " seconds.";
         } else {
-            return "You're good. You can start a new City Kings round for the next " + stopHours + " hours, " + minutes + " minutes, " + seconds + " seconds.";
+            return "You're good. You can start a new City Kings round for the next " + stopHours + " hours, " + minutes + " minutes, " + seconds + " seconds. Follow the flowchart https://badazzes.slack.com/files/U9S44RGNP/FBN4T7TAA/image.png";
         }
     }
 }

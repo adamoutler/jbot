@@ -1,11 +1,5 @@
 package example.jbot.slack;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.logging.Level;
 import me.ramswaroop.jbot.core.common.Controller;
 import me.ramswaroop.jbot.core.common.EventType;
 import me.ramswaroop.jbot.core.common.JBot;
@@ -18,11 +12,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.regex.Matcher;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import com.adamoutler.time.CityKingsTime;
-import java.util.Arrays;
+import com.adamoutler.time.SlackTools;
 
 /**
  * A simple Slack Bot. You can create multiple bots by just extending
@@ -36,8 +27,9 @@ import java.util.Arrays;
 @Profile("slack")
 public class SlackBot extends Bot {
 
+    private final String MYUSERID = "UBS24JP1U";
+    final String FLOWCHARTURL = "https://badazzes.slack.com/files/U9S44RGNP/FBN4T7TAA/image.png";
     String[] timeCommands = new String[]{"we join", "City Kings Time"};
-
     private static final Logger logger = LoggerFactory.getLogger(SlackBot.class);
 
     /**
@@ -69,21 +61,53 @@ public class SlackBot extends Bot {
      */
     @Controller(events = {EventType.DIRECT_MENTION, EventType.DIRECT_MESSAGE})
     public void onReceiveDM(WebSocketSession session, Event event) {
+        if (isMyOwnMessage(event)) {
+            return;
+        }
 
+        boolean validCommand = false;
         if (!event.getText().isEmpty()) {
-            maybeDoTimeCommand(event, session);
+            if (maybeDoTimeCommand(event, session) || maybeDoFlowchart(event, session)) {
+                validCommand = true;
+            };
 
         }
+        if (!validCommand) {
+            reply(session, event, "I don't understand.");
+        }
+
     }
 
-    private void maybeDoTimeCommand(Event event, WebSocketSession session) {
+    private boolean isMyOwnMessage(Event event) {
+        String user=SlackTools.getSlackUsername(event);
+        if (user.equals(MYUSERID)) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean maybeDoTimeCommand(Event event, WebSocketSession session) {
         for (String t : timeCommands) {
             if (event.getText().toLowerCase().contains(t)) {
                 reply(session, event, CityKingsTime.getCityKingsTime());
+                return true;
             }
         }
+        return false;
     }
 
+    private boolean maybeDoFlowchart(Event event, WebSocketSession session) {
+
+        if (event.getText().toLowerCase().contains("flowchart")) {
+            reply(session, event, "Here's the current flowchart! " + FLOWCHARTURL);
+            return true;
+
+        }
+        return false;
+    }
+
+    
+    
     /**
      * Invoked when bot receives an event of type message with text satisfying
      * the pattern {@code ([a-z ]{2})(\d+)([a-z ]{2})}. For example, messages
@@ -94,10 +118,10 @@ public class SlackBot extends Bot {
      */
     @Controller(events = EventType.MESSAGE, pattern = "^([a-z ]{2})(\\d+)([a-z ]{2})$")
     public void onReceiveMessage(WebSocketSession session, Event event, Matcher matcher) {
-        reply(session, event, "First group: " + matcher.group(0) + "\n"
-                + "Second group: " + matcher.group(1) + "\n"
-                + "Third group: " + matcher.group(2) + "\n"
-                + "Fourth group: " + matcher.group(3));
+//        reply(session, event, "First group: " + matcher.group(0) + "\n"
+//                + "Second group: " + matcher.group(1) + "\n"
+//                + "Third group: " + matcher.group(2) + "\n"
+//                + "Fourth group: " + matcher.group(3));
     }
 
     /**
@@ -108,7 +132,7 @@ public class SlackBot extends Bot {
      */
     @Controller(events = EventType.PIN_ADDED)
     public void onPinAdded(WebSocketSession session, Event event) {
-        reply(session, event, "Thanks for the pin! You can find all pinned items under channel details.");
+//        reply(session, event, "Thanks for the pin! You can find all pinned items under channel details.");
     }
 
     /**
@@ -123,7 +147,7 @@ public class SlackBot extends Bot {
      */
     @Controller(events = EventType.FILE_SHARED)
     public void onFileShared(WebSocketSession session, Event event) {
-        logger.info("File shared: {}", event);
+//        logger.info("File shared: {}", event);
     }
 
     /**
@@ -138,8 +162,8 @@ public class SlackBot extends Bot {
      */
     @Controller(pattern = "(setup meeting)", next = "confirmTiming")
     public void setupMeeting(WebSocketSession session, Event event) {
-        startConversation(event, "confirmTiming");   // start conversation
-        reply(session, event, "Cool! At what time (ex. 15:30) do you want me to set up the meeting?");
+//        startConversation(event, "confirmTiming");   // start conversation
+//        reply(session, event, "Cool! At what time (ex. 15:30) do you want me to set up the meeting?");
     }
 
     /**
@@ -151,9 +175,9 @@ public class SlackBot extends Bot {
      */
     @Controller(next = "askTimeForMeeting")
     public void confirmTiming(WebSocketSession session, Event event) {
-        reply(session, event, "Your meeting is set at " + event.getText()
-                + ". Would you like to repeat it tomorrow?");
-        nextConversation(event);    // jump to next question in conversation
+//        reply(session, event, "Your meeting is set at " + event.getText()
+//                + ". Would you like to repeat it tomorrow?");
+//        nextConversation(event);    // jump to next question in conversation
     }
 
     /**
@@ -165,13 +189,13 @@ public class SlackBot extends Bot {
      */
     @Controller(next = "askWhetherToRepeat")
     public void askTimeForMeeting(WebSocketSession session, Event event) {
-        if (event.getText().contains("yes")) {
-            reply(session, event, "Okay. Would you like me to set a reminder for you?");
-            nextConversation(event);    // jump to next question in conversation  
-        } else {
-            reply(session, event, "No problem. You can always schedule one with 'setup meeting' command.");
-            stopConversation(event);    // stop conversation only if user says no
-        }
+//        if (event.getText().contains("yes")) {
+//            reply(session, event, "Okay. Would you like me to set a reminder for you?");
+//            nextConversation(event);    // jump to next question in conversation  
+//        } else {
+//            reply(session, event, "No problem. You can always schedule one with 'setup meeting' command.");
+//            stopConversation(event);    // stop conversation only if user says no
+//        }
     }
 
     /**
@@ -183,11 +207,11 @@ public class SlackBot extends Bot {
      */
     @Controller
     public void askWhetherToRepeat(WebSocketSession session, Event event) {
-        if (event.getText().contains("yes")) {
-            reply(session, event, "Great! I will remind you tomorrow before the meeting.");
-        } else {
-            reply(session, event, "Okay, don't forget to attend the meeting tomorrow :)");
-        }
-        stopConversation(event);    // stop conversation
+//        if (event.getText().contains("yes")) {
+//            reply(session, event, "Great! I will remind you tomorrow before the meeting.");
+//        } else {
+//            reply(session, event, "Okay, don't forget to attend the meeting tomorrow :)");
+//        }
+//        stopConversation(event);    // stop conversation
     }
 }

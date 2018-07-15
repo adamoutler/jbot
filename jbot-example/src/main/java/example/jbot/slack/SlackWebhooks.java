@@ -44,7 +44,7 @@ public class SlackWebhooks {
     @PostConstruct
     public void invokeSlackWebhook() {
         RestTemplate restTemplate = new RestTemplate();
-        RichMessage richMessage = new RichMessage("Just to test Slack's incoming webhooks.");
+        RichMessage richMessage = new RichMessage("I'm online!");
         // set attachments
         Attachment[] attachments = new Attachment[1];
         attachments[0] = new Attachment();
@@ -52,17 +52,17 @@ public class SlackWebhooks {
         richMessage.setAttachments(attachments);
 
         // For debugging purpose only
-        try {
-            logger.debug("Reply (RichMessage): {}", new ObjectMapper().writeValueAsString(richMessage));
-        } catch (JsonProcessingException e) {
-            logger.debug("Error parsing RichMessage: ", e);
-        }
-
-        // Always remember to send the encoded message to Slack
-        try {
-            restTemplate.postForEntity(slackIncomingWebhookUrl, richMessage.encodedMessage(), String.class);
-        } catch (RestClientException e) {
-            logger.error("Error posting to Slack Incoming Webhook: ", e);
-        }
+//        try {
+//            logger.debug("Reply (RichMessage): {}", new ObjectMapper().writeValueAsString(richMessage));
+//        } catch (JsonProcessingException e) {
+//            logger.debug("Error parsing RichMessage: ", e);
+//        }
+//
+//        // Always remember to send the encoded message to Slack
+//        try {
+//            restTemplate.postForEntity(slackIncomingWebhookUrl, richMessage.encodedMessage(), String.class);
+//        } catch (RestClientException e) {
+//            logger.error("Error posting to Slack Incoming Webhook: ", e);
+//        }
     }
 }
