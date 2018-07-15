@@ -1,11 +1,5 @@
 package example.jbot.slack;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.logging.Level;
 import me.ramswaroop.jbot.core.common.Controller;
 import me.ramswaroop.jbot.core.common.EventType;
 import me.ramswaroop.jbot.core.common.JBot;
@@ -18,15 +12,11 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.regex.Matcher;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-import com.adamoutler.time.CityKingsTime;
 
 /**
- * A simple Slack Bot. You can create multiple bots by just extending
- * {@link Bot} class like this one. Though it is recommended to create only bot
- * per jbot instance.
+ * A simple Slack Bot. You can create multiple bots by just
+ * extending {@link Bot} class like this one. Though it is
+ * recommended to create only bot per jbot instance.
  *
  * @author ramswaroop
  * @version 1.0.0, 05/06/2016
@@ -38,9 +28,8 @@ public class SlackBot extends Bot {
     private static final Logger logger = LoggerFactory.getLogger(SlackBot.class);
 
     /**
-     * Slack token from application.properties file. You can get your slack
-     * token next <a href="https://my.slack.com/services/new/bot">creating a new
-     * bot</a>.
+     * Slack token from application.properties file. You can get your slack token
+     * next <a href="https://my.slack.com/services/new/bot">creating a new bot</a>.
      */
     @Value("${slackBotToken}")
     private String slackToken;
@@ -56,10 +45,10 @@ public class SlackBot extends Bot {
     }
 
     /**
-     * Invoked when the bot receives a direct mention (@botname: message) or a
-     * direct message. NOTE: These two event types are added by jbot to make
-     * your task easier, Slack doesn't have any direct way to determine these
-     * type of events.
+     * Invoked when the bot receives a direct mention (@botname: message)
+     * or a direct message. NOTE: These two event types are added by jbot
+     * to make your task easier, Slack doesn't have any direct way to
+     * determine these type of events.
      *
      * @param session
      * @param event
@@ -67,38 +56,22 @@ public class SlackBot extends Bot {
     @Controller(events = {EventType.DIRECT_MENTION, EventType.DIRECT_MESSAGE})
     public void onReceiveDM(WebSocketSession session, Event event) {
         reply(session, event, "Hi, I am " + slackService.getCurrentUser().getName());
-        if (!event.getText().isEmpty() && event.getText().toLowerCase().contains("what time")) {
-            reply(session,event,CityKingsTime.getCityKingsTimeMessage());
-        }
     }
-
-    public String processJavascript(String value) {
-        try {
-            ScriptEngine engine = new ScriptEngineManager().getEngineByName("JavaScript");
-            String s = engine.eval(value).toString();
-            return s;
-        } catch (ScriptException ex) {
-        }
-
-        return null;
-    }
-
-  
 
     /**
      * Invoked when bot receives an event of type message with text satisfying
-     * the pattern {@code ([a-z ]{2})(\d+)([a-z ]{2})}. For example, messages
-     * like "ab12xy" or "ab2bc" etc will invoke this method.
+     * the pattern {@code ([a-z ]{2})(\d+)([a-z ]{2})}. For example,
+     * messages like "ab12xy" or "ab2bc" etc will invoke this method.
      *
      * @param session
      * @param event
      */
     @Controller(events = EventType.MESSAGE, pattern = "^([a-z ]{2})(\\d+)([a-z ]{2})$")
     public void onReceiveMessage(WebSocketSession session, Event event, Matcher matcher) {
-        reply(session, event, "First group: " + matcher.group(0) + "\n"
-                + "Second group: " + matcher.group(1) + "\n"
-                + "Third group: " + matcher.group(2) + "\n"
-                + "Fourth group: " + matcher.group(3));
+        reply(session, event, "First group: " + matcher.group(0) + "\n" +
+                "Second group: " + matcher.group(1) + "\n" +
+                "Third group: " + matcher.group(2) + "\n" +
+                "Fourth group: " + matcher.group(3));
     }
 
     /**
@@ -113,9 +86,9 @@ public class SlackBot extends Bot {
     }
 
     /**
-     * Invoked when bot receives an event of type file shared. NOTE: You can't
-     * reply to this event as slack doesn't send a channel id for this event
-     * type. You can learn more about
+     * Invoked when bot receives an event of type file shared.
+     * NOTE: You can't reply to this event as slack doesn't send
+     * a channel id for this event type. You can learn more about
      * <a href="https://api.slack.com/events/file_shared">file_shared</a>
      * event from Slack's Api documentation.
      *
@@ -127,12 +100,12 @@ public class SlackBot extends Bot {
         logger.info("File shared: {}", event);
     }
 
+
     /**
-     * Conversation feature of JBot. This method is the starting point of the
-     * conversation (as it calls {@link Bot#startConversation(Event, String)}
-     * within it. You can chain methods which will be invoked one after the
-     * other leading to a conversation. You can chain methods with
-     * {@link Controller#next()} by specifying the method name to chain with.
+     * Conversation feature of JBot. This method is the starting point of the conversation (as it
+     * calls {@link Bot#startConversation(Event, String)} within it. You can chain methods which will be invoked
+     * one after the other leading to a conversation. You can chain methods with {@link Controller#next()} by
+     * specifying the method name to chain with.
      *
      * @param session
      * @param event
@@ -144,22 +117,20 @@ public class SlackBot extends Bot {
     }
 
     /**
-     * This method will be invoked after
-     * {@link SlackBot#setupMeeting(WebSocketSession, Event)}.
+     * This method will be invoked after {@link SlackBot#setupMeeting(WebSocketSession, Event)}.
      *
      * @param session
      * @param event
      */
     @Controller(next = "askTimeForMeeting")
     public void confirmTiming(WebSocketSession session, Event event) {
-        reply(session, event, "Your meeting is set at " + event.getText()
-                + ". Would you like to repeat it tomorrow?");
+        reply(session, event, "Your meeting is set at " + event.getText() +
+                ". Would you like to repeat it tomorrow?");
         nextConversation(event);    // jump to next question in conversation
     }
 
     /**
-     * This method will be invoked after
-     * {@link SlackBot#confirmTiming(WebSocketSession, Event)}.
+     * This method will be invoked after {@link SlackBot#confirmTiming(WebSocketSession, Event)}.
      *
      * @param session
      * @param event
@@ -176,8 +147,7 @@ public class SlackBot extends Bot {
     }
 
     /**
-     * This method will be invoked after
-     * {@link SlackBot#askTimeForMeeting(WebSocketSession, Event)}.
+     * This method will be invoked after {@link SlackBot#askTimeForMeeting(WebSocketSession, Event)}.
      *
      * @param session
      * @param event
