@@ -67,7 +67,7 @@ public class SlackBot extends Bot {
 
         boolean validCommand = false;
         if (!event.getText().isEmpty()) {
-            if (maybeDoTimeCommand(event, session) || maybeDoFlowchart(event, session)) {
+            if (maybeDoTimeCommand(event, session) || maybeDoFlowchart(event, session)||maybeDoSource(event,session)) {
                 validCommand = true;
             };
 
@@ -106,7 +106,15 @@ public class SlackBot extends Bot {
         return false;
     }
 
-    
+        private boolean maybeDoSource(Event event, WebSocketSession session) {
+
+        if (event.getText().toLowerCase().contains("source")) {
+            reply(session, event, "My source code is here https://github.com/adamoutler/jbot.");
+            return true;
+
+        }
+        return false;
+    }
     
     /**
      * Invoked when bot receives an event of type message with text satisfying
