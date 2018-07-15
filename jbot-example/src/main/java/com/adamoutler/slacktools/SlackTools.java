@@ -3,19 +3,24 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.adamoutler.time;
-
+package com.adamoutler.slacktools;
 
 import me.ramswaroop.jbot.core.slack.models.Event;
+
 
 /**
  *
  * @author adamo
  */
+   
 public class SlackTools {
+
+    
     public static String getSlackUsername(Event event) {
-        String s=event.getUserId();
+        String s = event.getUserId();
         return s;
 
     }
+
+   
 }

@@ -13,7 +13,10 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.util.regex.Matcher;
 import com.adamoutler.time.CityKingsTime;
-import com.adamoutler.time.SlackTools;
+import com.adamoutler.slacktools.SlackTools;
+import me.ramswaroop.jbot.core.slack.SlackApiEndpoints;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.socket.WebSocketMessage;
 
 /**
  * A simple Slack Bot. You can create multiple bots by just extending
@@ -26,11 +29,12 @@ import com.adamoutler.time.SlackTools;
 @JBot
 @Profile("slack")
 public class SlackBot extends Bot {
-
+@Autowired
+    SlackApiEndpoints slackApiEndpoints;
     private final String MYUSERID = "UBS24JP1U";
     final String FLOWCHARTURL = "https://badazzes.slack.com/files/U9S44RGNP/FBN4T7TAA/image.png";
     String[] timeCommands = new String[]{"we join", "City Kings Time"};
-    private static final Logger logger = LoggerFactory.getLogger(SlackBot.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SlackBot.class);
 
     /**
      * Slack token from application.properties file. You can get your slack
@@ -65,25 +69,19 @@ public class SlackBot extends Bot {
             return;
         }
 
-        boolean validCommand = false;
         if (!event.getText().isEmpty()) {
-            if (maybeDoTimeCommand(event, session) || maybeDoFlowchart(event, session)||maybeDoSource(event,session)) {
-                validCommand = true;
-            };
-
+            if (maybeDoTimeCommand(event, session) || maybeDoFlowchart(event, session) || maybeDoSource(event, session)) {
+                System.out.println("done");
+            } else {
+                WebSocketMessage msg;
+                reply(session, event, "I don't understand.");
+            }
         }
-        if (!validCommand) {
-            reply(session, event, "I don't understand.");
-        }
-
     }
-
+  
     private boolean isMyOwnMessage(Event event) {
-        String user=SlackTools.getSlackUsername(event);
-        if (user.equals(MYUSERID)) {
-            return true;
-        }
-        return false;
+        String user = SlackTools.getSlackUsername(event);
+        return user.equals(MYUSERID);
     }
 
     private boolean maybeDoTimeCommand(Event event, WebSocketSession session) {
@@ -106,7 +104,7 @@ public class SlackBot extends Bot {
         return false;
     }
 
-        private boolean maybeDoSource(Event event, WebSocketSession session) {
+    private boolean maybeDoSource(Event event, WebSocketSession session) {
 
         if (event.getText().toLowerCase().contains("source")) {
             reply(session, event, "My source code is here https://github.com/adamoutler/jbot.");
@@ -115,6 +113,9 @@ public class SlackBot extends Bot {
         }
         return false;
     }
+
+
+    
     
     /**
      * Invoked when bot receives an event of type message with text satisfying
@@ -123,6 +124,7 @@ public class SlackBot extends Bot {
      *
      * @param session
      * @param event
+     * @param matcher
      */
     @Controller(events = EventType.MESSAGE, pattern = "^([a-z ]{2})(\\d+)([a-z ]{2})$")
     public void onReceiveMessage(WebSocketSession session, Event event, Matcher matcher) {
