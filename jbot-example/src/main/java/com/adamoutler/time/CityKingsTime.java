@@ -18,16 +18,16 @@ public class CityKingsTime {
     final static int CKSTOPTIME = 4;   //UTC hour 2 = 0300 UK, 2400 EST, 2100 PAC, 1200 BEJ
     final static int CKSTARTTIME = 8;  //UTC hour 7 = 0800 UK, 0400 EST, 2300 PAC, 1800 BEJ
 
-    public static void main(String[] args) {
-        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
-        int uHour = getHour(now);
-        int uMinute = getMinute(now);
-        int uSecond = getSecond(now);
-        for (int i = 0; i <= 23; i++) {
-            System.out.println(calculateCKTimes(i, uMinute, uSecond));
-        }
-        System.out.println(calculateCKTimes(uHour, uMinute, uSecond));
-    }
+//    public static void main(String[] args) {
+//        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+//        int uHour = getHour(now);
+//        int uMinute = getMinute(now);
+//        int uSecond = getSecond(now);
+//        for (int i = 0; i <= 23; i++) {
+//            System.out.println(calculateCKTimes(i, uMinute, uSecond));
+//        }
+//        System.out.println(calculateCKTimes(uHour, uMinute, uSecond));
+//    }
 
     public static String getCityKingsTime(){
                 ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
