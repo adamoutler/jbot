@@ -14,9 +14,9 @@ import java.time.ZonedDateTime;
  */
 public class CityKingsTime {
 
-    final static int CKSTOPTIME = 3;   //UTC hour 2 = 0300 UK, 2400 EST, 2100 PAC, 1200 BEJ
-    final static int CKSTARTTIME = 8;  //UTC hour 7 = 0800 UK, 0400 EST, 2300 PAC, 1800 BEJ
-
+    final static int CKSTOPTIME = 2;   //UTC hour 2 = 0300 UK, 2400 EST, 2100 PAC, 1200 BEJ
+    final static int CKSTARTTIME = 9;  //UTC hour 7 = 0800 UK, 0400 EST, 2300 PAC, 1800 BEJ
+    final static int CKGOODTIME = 14;
 //    public static void main(String[] args) {
 //        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
 //        int uHour = getHour(now);
@@ -54,6 +54,7 @@ public class CityKingsTime {
         //calculate
         int stopHours = maybeAdd24(CKSTOPTIME-uHour);
         int startHours = maybeAdd24(CKSTARTTIME-uHour );
+        int goodHours = maybeAdd24(CKSTARTTIME-uHour );
         int minutesleft = 59 - utcMinutes;
         int secondsleft = 59 - utcSeconds;
         String minutes;
@@ -73,9 +74,13 @@ public class CityKingsTime {
 
         //display
         if (uHour > CKSTOPTIME && uHour <= CKSTARTTIME) {
-            return "DO NOT START CK! Our gang is asleep. If you start now our odds of Instant Victory are greatly reduced.  Wait for " + startHours + " hours, " + minutes + " minutes, " + seconds + " seconds.";
+            return "DO NOT START CK! Most of our gang is asleep. If you start now our odds of Instant Victory are greatly reduced.  Wait for " + goodHours + " hours, " + minutes + " minutes, " + seconds + " seconds, when a majority of our team is available.  If it's important to start quickly, at least wait for "+startHours+" hours, a few hours before sun-up in USA.";
         } else {
-            return "You're good. You can start a new City Kings round for the next " + stopHours + " hours, " + minutes + " minutes, " + seconds + " seconds. Want to see the flowchart? Just ask!";
+            if (uHour<CKGOODTIME){
+                return "While you could start now, for a coordinated strike with more than 1/2 of our team, it might be better to wait for " + goodHours + " hours, " + minutes + " minutes, " + seconds + " seconds. Want to see the flowchart? Just ask!";
+            } else {
+                return "You're good. It's prime hours to start a new City Kings round for the next " + stopHours + " hours, " + minutes + " minutes, " + seconds + " seconds. Want to see the flowchart? Just ask!";
+            }
         }
     }
 }
