@@ -14,6 +14,8 @@ import org.springframework.web.socket.WebSocketSession;
 import java.util.regex.Matcher;
 import com.adamoutler.time.CityKingsTime;
 import com.adamoutler.slacktools.SlackTools;
+import java.util.Random;
+import java.util.logging.Level;
 import me.ramswaroop.jbot.core.slack.SlackApiEndpoints;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.socket.WebSocketMessage;
@@ -29,7 +31,8 @@ import org.springframework.web.socket.WebSocketMessage;
 @JBot
 @Profile("slack")
 public class SlackBot extends Bot {
-@Autowired
+
+    @Autowired
     SlackApiEndpoints slackApiEndpoints;
     private final String MYUSERID = "UBS24JP1U";
     final String FLOWCHARTURL = "https://badazzes.slack.com/files/U9S44RGNP/FBN4T7TAA/image.png";
@@ -70,7 +73,7 @@ public class SlackBot extends Bot {
         }
 
         if (!event.getText().isEmpty()) {
-            if (maybeDoTimeCommand(event, session) || maybeDoFlowchart(event, session) || maybeDoSource(event, session)) {
+            if ( maybeDoTimeCommand(event, session) || maybeDoFlowchart(event, session) || maybeDoSource(event, session) || maybeGetQuote(event, session)|| maybeDoAlwaysWatching(event, session)) {
                 System.out.println("done");
             } else {
                 WebSocketMessage msg;
@@ -78,7 +81,32 @@ public class SlackBot extends Bot {
             }
         }
     }
-  
+
+    private boolean maybeGetQuote(Event event, WebSocketSession session) {
+
+        if (event.getText().toLowerCase().contains("inspir")) {
+
+            reply(session, event, getQuote());
+            return true;
+        }
+        return false;
+    }
+
+    public static String getQuote() {
+        String[] array = new String[]{"All warfare is based on deception.--Sun Tsu",
+            "The supreme art of war is to subdue the enemy without fighting.--Sun Tsu",
+            "Know thy self, know thy enemy. A thousand battles, a thousand victories.--Sun Tsu",
+            "If you know the enemy and know yourself you need not fear the results of a hundred battles.--Sun Tsu",
+            "Know your enemy and know yourself and you can fight a hundred battles without disaster.--Sun Tsu",
+            "Strategy without tactics is the slowest route to victory. Tactics without strategy is the noise before defeat.--Sun Tsu",
+            "Opportunities multiply as they are seized.--Sun Tsu",
+            "Victorious warriors win first and then go to war, while defeated warriors go to war first and then seek to win.--Sun Tsu",
+            "Hence to fight and conquer in all your battles is not supreme excellence; supreme excellence consists in breaking the enemy's resistance without fighting.--Sun Tsu",
+            "Pretend inferiority and encourage his arrogance.--Sun Tsu"};
+        int rnd = new Random().nextInt(array.length);
+        return array[rnd];
+    }
+
     private boolean isMyOwnMessage(Event event) {
         String user = SlackTools.getSlackUsername(event);
         return user.equals(MYUSERID);
@@ -114,9 +142,6 @@ public class SlackBot extends Bot {
         return false;
     }
 
-
-    
-    
     /**
      * Invoked when bot receives an event of type message with text satisfying
      * the pattern {@code ([a-z ]{2})(\d+)([a-z ]{2})}. For example, messages
@@ -224,4 +249,21 @@ public class SlackBot extends Bot {
 //        }
 //        stopConversation(event);    // stop conversation
     }
+
+    private boolean maybeDoAlwaysWatching(Event event, WebSocketSession session) {
+
+        if (event.getText().toLowerCase().contains("always watching")) {
+
+            reply(session, event, "I may be pretty quiet, but I'm always here and see everything going on at all times.  I could react to any message, but I choose not to. I'm always watching everything.  always...");
+            try {
+                Thread.sleep(30000);
+            } catch (InterruptedException ex) {
+                java.util.logging.Logger.getLogger(SlackBot.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            reply(session, event, "...literally always.");
+            return true;
+        }
+        return false;
+    }
+
 }
