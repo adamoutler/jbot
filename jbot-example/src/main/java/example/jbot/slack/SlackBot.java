@@ -39,6 +39,10 @@ public class SlackBot extends Bot {
     String[] timeCommands = new String[]{"we join", "City Kings Time"};
     private static final Logger LOGGER = LoggerFactory.getLogger(SlackBot.class);
 
+    private final String QUICKFIGHTSCRIPT="https://pastebin.adamoutler.com/C0B7";
+    private final String NOOBSCRIPT="https://pastebin.adamoutler.com/HxXW";
+    
+    
     /**
      * Slack token from application.properties file. You can get your slack
      * token next <a href="https://my.slack.com/services/new/bot">creating a new
@@ -73,7 +77,7 @@ public class SlackBot extends Bot {
         }
 
         if (!event.getText().isEmpty()) {
-            if ( maybeDoTimeCommand(event, session) || maybeDoFlowchart(event, session) || maybeDoSource(event, session) || maybeGetQuote(event, session)|| maybeDoAlwaysWatching(event, session)) {
+            if ( maybeDoTimeCommand(event, session) || maybeDoFlowchart(event, session) || maybeDoSource(event, session) || maybeGetQuote(event, session)|| maybeDoAlwaysWatching(event, session)||maybeDoNoobCommand(event,session)) {
                 System.out.println("done");
             } else {
                 WebSocketMessage msg;
@@ -122,6 +126,20 @@ public class SlackBot extends Bot {
         return false;
     }
 
+       private boolean maybeDoNoobCommand(Event event, WebSocketSession session) {
+        for (String t : timeCommands) {
+            if (event.getText().toLowerCase().contains("n00b")) {
+                reply(session, event, "Welcome to the gang.  I'm badazzes.org bot.  I have some helpful tips for you to pick up your game.");
+                reply(session, event, "This script will help you with automatic Quick Fights, and therefore Championship and Gang Fights on Android: "+this.QUICKFIGHTSCRIPT);
+                reply(session, event, "This script is used to display the message you saw when you came in this gang "+this.NOOBSCRIPT);
+                reply(session, event, "This is the City Kings flowchart "+this.FLOWCHARTURL);
+                reply(session, event, "Make sure to ask me directly before you click that JOIN button for a new round of City Kings.  You can say, '@badazzes.org should I join now?'.");
+                return true;
+            }
+        }
+        return false;
+    }
+    
     private boolean maybeDoFlowchart(Event event, WebSocketSession session) {
 
         if (event.getText().toLowerCase().contains("flowchart")) {
