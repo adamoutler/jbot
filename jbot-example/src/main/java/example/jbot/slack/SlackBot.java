@@ -36,7 +36,7 @@ public class SlackBot extends Bot {
     SlackApiEndpoints slackApiEndpoints;
     private final String MYUSERID = "UBS24JP1U";
     final String FLOWCHARTURL = "https://badazzes.slack.com/files/U9S44RGNP/FBN4T7TAA/image.png";
-    String[] timeCommands = new String[]{"we join", "City Kings Time"};
+    String[] timeCommands = new String[]{"we join", "City Kings Time", "i join"};
     private static final Logger LOGGER = LoggerFactory.getLogger(SlackBot.class);
 
     private final String QUICKFIGHTSCRIPT="https://pastebin.adamoutler.com/C0B7";
