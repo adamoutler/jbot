@@ -136,7 +136,7 @@ public class SlackBot extends Bot {
     private boolean maybeDoTimeCommand(Event event, WebSocketSession session) {
         for (String t : timeCommands) {
             if (event.getText().toLowerCase().contains(t)) {
-                reply(session, event, this.getUser(event).getProfile().getRealName()+CityKingsTime.getCityKingsTime());
+                reply(session, event, CityKingsTime.getCityKingsTime());
                 return true;
             }
         }
