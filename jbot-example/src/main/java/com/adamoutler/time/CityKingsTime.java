@@ -14,7 +14,7 @@ import java.time.ZonedDateTime;
  */
 public class CityKingsTime {
 
-    final static int CKSTOPTIME = 2;   //UTC hour 2 = 0300 UK, 2400 EST, 2100 PAC, 1200 BEJ
+    final static int CKSTOPTIME = 3;   //UTC hour 2 = 0300 UK, 2400 EST, 2100 PAC, 1200 BEJ
     final static int CKSTARTTIME = 10;  //UTC hour 7 = 0800 UK, 0400 EST, 2300 PAC, 1800 BEJ
     final static int CKGOODTIME = 13;
 //    public static void main(String[] args) {
