@@ -1,5 +1,6 @@
 package example.jbot.slack;
 
+import com.adamoutler.catstools.UserResponse;
 import me.ramswaroop.jbot.core.common.Controller;
 import me.ramswaroop.jbot.core.common.EventType;
 import me.ramswaroop.jbot.core.common.JBot;
@@ -14,10 +15,16 @@ import org.springframework.web.socket.WebSocketSession;
 import java.util.regex.Matcher;
 import com.adamoutler.time.CityKingsTime;
 import com.adamoutler.slacktools.SlackTools;
+import com.google.gson.GsonBuilder;
 import java.util.Random;
 import java.util.logging.Level;
 import me.ramswaroop.jbot.core.slack.SlackApiEndpoints;
+import me.ramswaroop.jbot.core.slack.models.RTM;
+import me.ramswaroop.jbot.core.slack.models.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.socket.WebSocketMessage;
 
 /**
@@ -36,11 +43,21 @@ public class SlackBot extends Bot {
     SlackApiEndpoints slackApiEndpoints;
     private final String MYUSERID = "UBS24JP1U";
     final String FLOWCHARTURL = "https://badazzes.slack.com/files/U9S44RGNP/FBN4T7TAA/image.png";
-    String[] timeCommands = new String[]{"we join", "City Kings Time", "i join"};
+    String[] timeCommands = new String[]{"we join", "city kings time", "i join"};
     private static final Logger LOGGER = LoggerFactory.getLogger(SlackBot.class);
-
     private final String QUICKFIGHTSCRIPT="https://pastebin.adamoutler.com/C0B7";
     private final String NOOBSCRIPT="https://pastebin.adamoutler.com/HxXW";
+    
+    
+
+    private User getUser(Event event){
+        UserResponse userResponse= new RestTemplate()
+                .getForEntity(slackApiEndpoints
+                        .getUserConnectApi()+"&user="+event.getUserId(), 
+                        UserResponse.class, slackToken)
+                .getBody();
+        return userResponse.getUser();
+    }
     
     
     /**
@@ -87,9 +104,7 @@ public class SlackBot extends Bot {
     }
 
     private boolean maybeGetQuote(Event event, WebSocketSession session) {
-
         if (event.getText().toLowerCase().contains("inspir")) {
-
             reply(session, event, getQuote());
             return true;
         }
@@ -119,7 +134,7 @@ public class SlackBot extends Bot {
     private boolean maybeDoTimeCommand(Event event, WebSocketSession session) {
         for (String t : timeCommands) {
             if (event.getText().toLowerCase().contains(t)) {
-                reply(session, event, CityKingsTime.getCityKingsTime());
+                reply(session, event, this.getUser(event).getName()+CityKingsTime.getCityKingsTime());
                 return true;
             }
         }
@@ -143,7 +158,7 @@ public class SlackBot extends Bot {
     private boolean maybeDoFlowchart(Event event, WebSocketSession session) {
 
         if (event.getText().toLowerCase().contains("flowchart")) {
-            reply(session, event, "Here's the current flowchart! " + FLOWCHARTURL);
+            reply(session, event, "Here's the current flowchart "+this.getUser(event).getName()+"!" + FLOWCHARTURL);
             return true;
 
         }
@@ -153,7 +168,7 @@ public class SlackBot extends Bot {
     private boolean maybeDoSource(Event event, WebSocketSession session) {
 
         if (event.getText().toLowerCase().contains("source")) {
-            reply(session, event, "My source code is here https://github.com/adamoutler/jbot.");
+            reply(session, event, this.getUser(event).getName()+", my source code is here https://github.com/adamoutler/jbot.");
             return true;
 
         }
@@ -185,7 +200,7 @@ public class SlackBot extends Bot {
      */
     @Controller(events = EventType.PIN_ADDED)
     public void onPinAdded(WebSocketSession session, Event event) {
-//        reply(session, event, "Thanks for the pin! You can find all pinned items under channel details.");
+        reply(session, event, "Thanks for the pin "+this.getUser(event).getName()+"! You can find all pinned items under channel details.");
     }
 
     /**
@@ -278,7 +293,7 @@ public class SlackBot extends Bot {
             } catch (InterruptedException ex) {
                 java.util.logging.Logger.getLogger(SlackBot.class.getName()).log(Level.SEVERE, null, ex);
             }
-            reply(session, event, "...literally always.");
+            reply(session, event, "...literally always "+this.getUser(event).getName()+".");
             return true;
         }
         return false;

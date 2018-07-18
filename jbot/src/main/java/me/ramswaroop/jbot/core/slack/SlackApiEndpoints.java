@@ -18,8 +18,10 @@ public class SlackApiEndpoints {
     public String getRtmConnectApi() {
         return slackApi + "/rtm.connect?token={token}";
     }
-
     public String getImListApi() {
         return slackApi + "/im.list?token={token}&limit={limit}&next_cursor={cursor}";
+    }
+    public String getUserConnectApi() {
+        return slackApi + "/users.info?token={token}";
     }
 }

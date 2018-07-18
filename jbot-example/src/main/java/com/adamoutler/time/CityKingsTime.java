@@ -74,12 +74,12 @@ public class CityKingsTime {
 
         //display
         if (uHour > CKSTOPTIME && uHour <= CKSTARTTIME) {
-            return "DO NOT START CK! Most of our gang is asleep. If you start now our odds of Instant Victory are greatly reduced.  Wait for " + goodHours + " hours, " + minutes + " minutes, " + seconds + " seconds, when a majority of our team is available.  If it's important to start quickly, at least wait for "+startHours+" hours, a few hours before sun-up in USA.";
+            return " DO NOT START CK! Most of our gang is asleep and most of China and Russia is awake.  Wait for " + goodHours + " hours, " + minutes + " minutes, " + seconds + " seconds, when a majority of our team is available.  If it's important to start quickly, at least wait for "+startHours+" hours, a few hours before sun-up in USA.";
         } else {
-            if (uHour<CKGOODTIME){
-                return "While you could start now, for a coordinated strike with more than 1/2 of our team, it might be better to wait for " + goodHours + " hours, " + minutes + " minutes, " + seconds + " seconds. Want to see the flowchart? Just ask!";
+            if (uHour<=CKGOODTIME){
+                return " DO NOT START CK! Odds of Instant Victory are greatly reduced for a coordinated strike with more than 1/2 of our team, it might be better to wait for " + goodHours + " hours, " + minutes + " minutes, " + seconds + " seconds. Want to see the flowchart? Just ask!";
             } else {
-                return "You're good. It's prime hours to start a new City Kings round for the next " + stopHours + " hours, " + minutes + " minutes, " + seconds + " seconds. Want to see the flowchart? Just ask!";
+                return " you're good. It's prime hours to start a new City Kings round for the next " + stopHours + " hours, " + minutes + " minutes, " + seconds + " seconds. Want to see the flowchart? Just ask!";
             }
         }
     }
