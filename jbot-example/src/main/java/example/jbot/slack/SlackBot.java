@@ -89,6 +89,8 @@ public class SlackBot extends Bot {
      */
     @Controller(events = {EventType.DIRECT_MENTION, EventType.DIRECT_MESSAGE})
     public void onReceiveDM(WebSocketSession session, Event event) {
+        User u=getUser(event);
+        System.out.println(u.getProfile().getRealName());
         if (isMyOwnMessage(event)) {
             return;
         }
@@ -134,7 +136,7 @@ public class SlackBot extends Bot {
     private boolean maybeDoTimeCommand(Event event, WebSocketSession session) {
         for (String t : timeCommands) {
             if (event.getText().toLowerCase().contains(t)) {
-                reply(session, event, this.getUser(event).getName()+CityKingsTime.getCityKingsTime());
+                reply(session, event, this.getUser(event).getProfile().getRealName()+CityKingsTime.getCityKingsTime());
                 return true;
             }
         }
@@ -158,7 +160,7 @@ public class SlackBot extends Bot {
     private boolean maybeDoFlowchart(Event event, WebSocketSession session) {
 
         if (event.getText().toLowerCase().contains("flowchart")) {
-            reply(session, event, "Here's the current flowchart "+this.getUser(event).getName()+"!" + FLOWCHARTURL);
+            reply(session, event, "Here's the current flowchart "+this.getUser(event).getProfile().getRealName()+"!" + FLOWCHARTURL);
             return true;
 
         }
@@ -168,7 +170,7 @@ public class SlackBot extends Bot {
     private boolean maybeDoSource(Event event, WebSocketSession session) {
 
         if (event.getText().toLowerCase().contains("source")) {
-            reply(session, event, this.getUser(event).getName()+", my source code is here https://github.com/adamoutler/jbot.");
+            reply(session, event, this.getUser(event).getProfile().getRealName()+", my source code is here https://github.com/adamoutler/jbot.");
             return true;
 
         }
@@ -200,7 +202,7 @@ public class SlackBot extends Bot {
      */
     @Controller(events = EventType.PIN_ADDED)
     public void onPinAdded(WebSocketSession session, Event event) {
-        reply(session, event, "Thanks for the pin "+this.getUser(event).getName()+"! You can find all pinned items under channel details.");
+        reply(session, event, "Thanks for the pin "+this.getUser(event).getProfile().getRealName()+"! You can find all pinned items under channel details.");
     }
 
     /**
@@ -293,7 +295,7 @@ public class SlackBot extends Bot {
             } catch (InterruptedException ex) {
                 java.util.logging.Logger.getLogger(SlackBot.class.getName()).log(Level.SEVERE, null, ex);
             }
-            reply(session, event, "...literally always "+this.getUser(event).getName()+".");
+            reply(session, event, "...literally always "+this.getUser(event).getProfile().getRealName()+".");
             return true;
         }
         return false;
