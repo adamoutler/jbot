@@ -30,4 +30,9 @@ public class SlackApiEndpoints {
     public String getChannelListApi() {
         return slackApi + "/channels.list?token={token}";
     }
+    
+
+        public String getUserPresenceApi(){
+        return slackApi+"/users.getPresence?token={token}";
+    }
 }

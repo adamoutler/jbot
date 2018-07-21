@@ -15,6 +15,8 @@ public class Profile {
     private String lastName;
     @JsonProperty("real_name")
     private String realName;
+    private String display_name;
+    private String display_name_normalized;
     private String email;
     private String skype;
     private String phone;
@@ -154,5 +156,19 @@ public class Profile {
 
     public void setStatusEmoji(String statusEmoji) {
         this.statusEmoji = statusEmoji;
+    }
+
+    /**
+     * @return the display_name
+     */
+    public String getDisplay_name() {
+        return display_name;
+    }
+
+    /**
+     * @return the display_name_normalized
+     */
+    public String getDisplay_name_normalized() {
+        return display_name_normalized;
     }
 }

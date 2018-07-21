@@ -16,6 +16,8 @@ public class UserExt extends User {
     private String tz;
     private String tz_label;
     private int tz_offset;
+    private UserPresence presence;
+    private boolean is_bot;
 
     /**
      * @return the tz
@@ -36,6 +38,27 @@ public class UserExt extends User {
      */
     public int getTz_offset() {
         return tz_offset;
+    }
+
+    /**
+     * @return the presence
+     */
+    public UserPresence getPresence() {
+        return presence;
+    }
+
+    /**
+     * @param presence the presence to set
+     */
+    public void setPresence(UserPresence presence) {
+        this.presence = presence;
+    }
+
+    /**
+     * @return the is_bot
+     */
+    public boolean isIs_bot() {
+        return is_bot;
     }
 
 }

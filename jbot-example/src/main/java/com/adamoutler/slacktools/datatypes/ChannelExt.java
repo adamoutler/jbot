@@ -37,7 +37,7 @@ public class ChannelExt extends Channel {
     private List<String> previous_names;
     private int num_members;
     private long timeLastFetchedUpdated=0;
-    private ArrayList<User> users=new ArrayList<>();
+    private ArrayList<UserExt> users=new ArrayList<>();
 
     @Override
     public String toString(){
@@ -262,9 +262,11 @@ public class ChannelExt extends Channel {
     }
     
     public ArrayList<UserExt> getUsers(SlackApiEndpoints slackApiEndpoints, String slackToken){
-        ArrayList<UserExt> users=new ArrayList<>();
+        users=new ArrayList<>();
         getMembers().forEach((userid) -> {
-            users.add(new RestTemplate().getForEntity(slackApiEndpoints.getUserInfoAPI() + "&user=" + userid, UserResponse.class, slackToken).getBody().getUser());
+            UserExt user=new RestTemplate().getForEntity(slackApiEndpoints.getUserInfoAPI() + "&user=" + userid, UserResponse.class, slackToken).getBody().getUser();
+            user.setPresence(new RestTemplate().getForEntity(slackApiEndpoints.getUserPresenceApi()+ "&user=" + userid, UserPresence.class, slackToken).getBody());
+            users.add(user);
         });
         return users;
     }
@@ -349,14 +351,14 @@ public class ChannelExt extends Channel {
     /**
      * @return the users
      */
-    public ArrayList<User> getUsers() {
+    public ArrayList<UserExt> getUsers() {
         return users;
     }
 
     /**
      * @param users the users to set
      */
-    public void setUsers(ArrayList<User> users) {
+    public void setUsers(ArrayList<UserExt> users) {
         this.users = users;
     }
 

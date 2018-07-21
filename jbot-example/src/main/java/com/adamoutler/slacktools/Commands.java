@@ -8,10 +8,12 @@ package com.adamoutler.slacktools;
 import com.adamoutler.slacktools.datatypes.ChannelExt;
 import com.adamoutler.slacktools.datatypes.ChannelResponse;
 import com.adamoutler.slacktools.datatypes.UserExt;
+import com.adamoutler.slacktools.datatypes.UserPresence;
 import com.adamoutler.slacktools.datatypes.UserResponse;
 import com.adamoutler.time.CityKingsTime;
 import example.jbot.slack.SlackBot;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.logging.Level;
@@ -52,22 +54,37 @@ public class Commands {
 
     }
 
-    class KeyValuePair {
+    class MemberTimeIndicators {
 
-        String key;
-        float value;
+        String timezoneName;
+        float timezoneOffsetInSeconds;
+        boolean online;
+        String presence;
+        String realName;
 
-        KeyValuePair(String k, float v) {
-            this.key = k;
-            this.value = v;
+        MemberTimeIndicators(String timezoneName, float timezoneOffsetInSeconds, String presence, String realName) {
+            this.timezoneName = timezoneName;
+            this.timezoneOffsetInSeconds = timezoneOffsetInSeconds;
+            this.online=online;
+            this.presence=presence;
+            this.realName=realName;
         }
 
+        public String getName(){
+            return realName;
+        }
+        public boolean getOnline(){
+            return online;
+        }
+        public String getPresence(){
+            return presence;
+        }
         public String getKey() {
-            return key;
+            return timezoneName;
         }
 
         public float getValue() {
-            return value;
+            return timezoneOffsetInSeconds;
         }
     }
 
@@ -94,13 +111,13 @@ public class Commands {
     }
 
     private boolean maybeGetUserTimezoneAverage(Event event, WebSocketSession session) {
-        if (!event.getText().toLowerCase().contains("calibrate")) {
+        if (!event.getText().toLowerCase().contains("user status")) {
             return false;
         }
 
-        ArrayList<ArrayList<KeyValuePair>> timezones = new ArrayList<>();
+        ArrayList<ArrayList<MemberTimeIndicators>> timezones = new ArrayList<>();
 
-        slackBot.reply(session, event, "Give me a minute... Communicating with Slack's Channel List, Channel Unfo, User List, and User Info APIs and calculating for #General.  This takes some time to compile the information.");
+        slackBot.reply(session, event, "Give me a minute... Communicating with Slack's Channel List, Channel Info, User List, and User Info APIs and calculating for #General.  This takes some time to compile the information.");
 
         for (int i = 0; i < 25; i++) {
             timezones.add(new ArrayList<>());
@@ -108,38 +125,37 @@ public class Commands {
 
         this.getChannels(event).stream().filter((channel) -> (channel.getName().toLowerCase().equals("general"))).forEachOrdered((channel) -> {
             channel.getUsers(slackApiEndpoints, slackToken).forEach((user) -> {
-                if (!user.isDeleted()) {
+                if (!user.isDeleted()&& !user.isIs_bot()) {
+                    String username=user.getProfile().getDisplay_name().isEmpty()?user.getProfile().getRealName():user.getProfile().getDisplay_name();
                     timezones.get(12 + (int) Math.floor(user.getTz_offset() / 60 / 60))
-                            .add(new KeyValuePair(user.getTz_label(), user.getTz_offset()));
+                            .add(new MemberTimeIndicators(user.getTz_label(), user.getTz_offset(),Integer.toString(user.getPresence().getLast_activity()),username));
                 }
             });
         });
 
         StringBuilder sb = new StringBuilder();
         Averaging averaging = new Averaging();
-        for (ArrayList<KeyValuePair> memberTimes : timezones) {
-            if (memberTimes.size() > 0) {
-                int gmt = (int) memberTimes.get(0).value / 60 / 60;
-                String gmtValue;
-                if (gmt > 0) {
-                    gmtValue = "+" + Integer.toString(gmt);
-                } else {
-                    gmtValue = Integer.toString(gmt);
-                }
-                if (memberTimes.size() > 2) {
-                    memberTimes.forEach((kvp) -> {
-                        averaging.add(kvp.value);
-                    });
-
-                    slackBot.reply(session, event, memberTimes.size() + " members in " + memberTimes.get(0).getKey() + " GMT" + (int) memberTimes.get(0).value / 60 / 60);
-                } else {
-                    sb.append("Ignored ").append(memberTimes.size()).append(" member(s) in ").append(memberTimes.get(0).getKey()).append(" GMT").append((int) memberTimes.get(0).value / 60 / 60).append(" while removing extremes. ");
-
-                }
+        timezones.stream().filter((memberTimes) -> (memberTimes.size() > 0)).map((memberTimes) -> {
+            int gmt = (int) memberTimes.get(0).timezoneOffsetInSeconds / 60 / 60;
+            String gmtValue;
+            if (gmt > 0) {
+                gmtValue = "+" + Integer.toString(gmt);
+            } else {
+                gmtValue = Integer.toString(gmt); 
             }
-        }
+            StringBuilder memberMessage=new StringBuilder();
+            for (MemberTimeIndicators ind:memberTimes){
+                memberMessage.append(" - ").append(ind.getName());
+            }
+            slackBot.reply(session, event, memberTimes.size() + " members in " + memberTimes.get(0).getKey() + " GMT" + gmtValue +"  "+memberMessage.toString());
+            return memberTimes;
+        }).filter((memberTimes) -> (memberTimes.size() > 2)).forEachOrdered((memberTimes) -> {
+            memberTimes.forEach((kvp) -> {
+                averaging.add(kvp.timezoneOffsetInSeconds);
+            });
+        });
 
-        slackBot.reply(session, event, sb.toString() + "\nThe mean Badazzes member is located in GMT " + averaging.getAverage() / 60 / 60);
+        slackBot.reply(session, event, sb.toString() + "\nExcluding the 1's and 2's, the mean-average Badazzes member is located in GMT " + averaging.getAverage() / 60 / 60);
         return true;
     }
 
@@ -219,13 +235,21 @@ public class Commands {
     }
 
     public User getUser(Event event) {
-        UserResponse userResponse = new RestTemplate().getForEntity(slackApiEndpoints.getUserInfoAPI() + "&user=" + event.getUserId(), UserResponse.class, slackToken).getBody();
-        return userResponse.getUser();
+        return getUser(event.getUserId());
     }
 
     public User getUser(String userid) {
         UserResponse userResponse = new RestTemplate().getForEntity(slackApiEndpoints.getUserInfoAPI() + "&user=" + userid, UserResponse.class, slackToken).getBody();
+        userResponse.getUser().setPresence(getUserPresence(userid));
+        
         return userResponse.getUser();
+    }
+
+    public UserPresence getUserPresence(String userId) {
+
+        UserPresence userPresence = new RestTemplate().getForEntity(slackApiEndpoints.getUserInfoAPI() + "&user=" + userId, UserPresence.class, slackToken).getBody();
+        return userPresence;
+
     }
 
     public boolean maybeDoSource(Event event, WebSocketSession session) {
