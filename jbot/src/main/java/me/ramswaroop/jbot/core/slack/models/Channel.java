@@ -8,10 +8,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Channel {
+    private long created;
     private String id;
     private String name;
     private String user;
-    private long created;
     private String creator;
     @JsonProperty("is_im")
     private boolean isIm;

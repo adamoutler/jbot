@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Profile {
+
     @JsonProperty("first_name")
     private String firstName;
     @JsonProperty("last_name")
@@ -27,6 +28,21 @@ public class Profile {
     private String statusText;
     @JsonProperty("status_emoji")
     private String statusEmoji;
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        String n = "\n";
+        sb.append("first name:").append(this.firstName).append(n);
+        sb.append("last name:").append(lastName).append(n);
+        sb.append("real name:").append(realName).append(n);
+        sb.append("email:").append(email).append(n);
+        sb.append("skype:").append(skype).append(n);
+        sb.append("phone:").append(phone).append(n);
+        sb.append("statusText:").append(statusText).append(n);
+        sb.append("statusEmoji:").append(statusEmoji).append(n);
+        return sb.toString();
+    }
 
     public String getFirstName() {
         return firstName;

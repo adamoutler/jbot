@@ -31,6 +31,30 @@ public class User {
     @JsonProperty("has_files")
     private boolean hasFiles;
 
+    
+    
+    
+    @Override
+    public String toString(){
+        StringBuilder sb=new StringBuilder();
+        String n="\n";
+        sb.append("USER NAME:            ").append(name).append(n);
+        sb.append("id").append(id).append(n);
+        sb.append("team id").append(teamId).append(n);
+        sb.append("deleted").append(deleted).append(n);
+        sb.append("color").append(color).append(n);
+        sb.append("profile").append(profile).append(n);
+        sb.append("is admin").append(isAdmin).append(n);
+        sb.append("is owner").append(isOwner).append(n);
+        sb.append("is primary owner").append(isPrimaryOwner).append(n);
+        sb.append("is restricted").append(isRestricted).append(n);
+        sb.append("is ultra restricted").append(isUltraRestricted).append(n);
+        sb.append("has 2 factor auth").append(has2fa).append(n);
+        sb.append("has files").append(n).append(hasFiles);
+        
+        return sb.toString();
+    }
+    
     public String getId() {
         return id;
     }

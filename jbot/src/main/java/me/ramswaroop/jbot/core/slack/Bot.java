@@ -154,7 +154,7 @@ public abstract class Bot extends BaseBot {
      * @param event   received from slack
      * @param reply   the message to send to slack
      */
-    protected final void reply(WebSocketSession session, Event event, Message reply) {
+     final void reply(WebSocketSession session, Event event, Message reply) {
         try {
             if (StringUtils.isEmpty(reply.getType())) {
                 reply.setType(EventType.MESSAGE.name().toLowerCase());
@@ -172,7 +172,7 @@ public abstract class Bot extends BaseBot {
         }
     }
 
-    protected final void reply(WebSocketSession session, Event event, String text) {
+     public final void reply(WebSocketSession session, Event event, String text) {
         reply(session, event, new Message(text));
     }
 
