@@ -52,8 +52,6 @@ public class Commands {
 
     }
 
-
-
     class KeyValuePair {
 
         String key;
@@ -96,14 +94,13 @@ public class Commands {
     }
 
     private boolean maybeGetUserTimezoneAverage(Event event, WebSocketSession session) {
-        if(!event.getText().toLowerCase().contains("calibrate")){
+        if (!event.getText().toLowerCase().contains("calibrate")) {
             return false;
         }
-        
-        
+
         ArrayList<ArrayList<KeyValuePair>> timezones = new ArrayList<>();
 
-        slackBot.reply(session, event, "Give me a minute, communicating with Slack's Channel List, Channel Unfo, User List, and User Info APIs and calculating for #General");
+        slackBot.reply(session, event, "Give me a minute... Communicating with Slack's Channel List, Channel Unfo, User List, and User Info APIs and calculating for #General.  This takes some time to compile the information.");
 
         for (int i = 0; i < 25; i++) {
             timezones.add(new ArrayList<>());
@@ -118,20 +115,31 @@ public class Commands {
             });
         });
 
-        StringBuilder sb=new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         Averaging averaging = new Averaging();
         for (ArrayList<KeyValuePair> memberTimes : timezones) {
-            if (memberTimes.size() > 2) {
-                slackBot.reply(session, event, "Counting mean " + memberTimes.size() + " members in " + memberTimes.get(0).getKey() + " GMT" + (int) memberTimes.get(0).value / 60 / 60);
-                memberTimes.forEach((kvp) -> {
-                    averaging.add(kvp.value);
-                });
-            } else if (memberTimes.size() > 0) {
-                sb.append("Ignored ").append(memberTimes.size()).append(" member(s( in ").append( memberTimes.get(0).getKey()).append(" GMT").append( (int)memberTimes.get(0).value / 60 / 60).append(" while removing extremes. ");
+            if (memberTimes.size() > 0) {
+                int gmt = (int) memberTimes.get(0).value / 60 / 60;
+                String gmtValue;
+                if (gmt > 0) {
+                    gmtValue = "+" + Integer.toString(gmt);
+                } else {
+                    gmtValue = Integer.toString(gmt);
+                }
+                if (memberTimes.size() > 2) {
+                    memberTimes.forEach((kvp) -> {
+                        averaging.add(kvp.value);
+                    });
+
+                    slackBot.reply(session, event, memberTimes.size() + " members in " + memberTimes.get(0).getKey() + " GMT" + (int) memberTimes.get(0).value / 60 / 60);
+                } else {
+                    sb.append("Ignored ").append(memberTimes.size()).append(" member(s) in ").append(memberTimes.get(0).getKey()).append(" GMT").append((int) memberTimes.get(0).value / 60 / 60).append(" while removing extremes. ");
+
+                }
             }
         }
 
-        slackBot.reply(session, event, sb.toString()+"\nThe mean Badazzes member is located in GMT " + averaging.getAverage() / 60 / 60);
+        slackBot.reply(session, event, sb.toString() + "\nThe mean Badazzes member is located in GMT " + averaging.getAverage() / 60 / 60);
         return true;
     }
 
