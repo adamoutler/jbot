@@ -1,31 +1,18 @@
 package example.jbot.slack;
 
-import com.adamoutler.catstools.UserResponse;
+import com.adamoutler.slacktools.Commands;
 import me.ramswaroop.jbot.core.common.Controller;
 import me.ramswaroop.jbot.core.common.EventType;
 import me.ramswaroop.jbot.core.common.JBot;
 import me.ramswaroop.jbot.core.slack.Bot;
 import me.ramswaroop.jbot.core.slack.models.Event;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.web.socket.WebSocketSession;
-
 import java.util.regex.Matcher;
-import com.adamoutler.time.CityKingsTime;
-import com.adamoutler.slacktools.SlackTools;
-import com.google.gson.GsonBuilder;
-import java.util.Random;
-import java.util.logging.Level;
 import me.ramswaroop.jbot.core.slack.SlackApiEndpoints;
-import me.ramswaroop.jbot.core.slack.models.RTM;
-import me.ramswaroop.jbot.core.slack.models.User;
+import me.ramswaroop.jbot.core.slack.models.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.socket.WebSocketMessage;
 
 /**
  * A simple Slack Bot. You can create multiple bots by just extending
@@ -41,25 +28,7 @@ public class SlackBot extends Bot {
 
     @Autowired
     SlackApiEndpoints slackApiEndpoints;
-    private final String MYUSERID = "UBS24JP1U";
-    final String FLOWCHARTURL = "https://badazzes.slack.com/files/U9S44RGNP/FBN4T7TAA/image.png";
-    String[] timeCommands = new String[]{"we join", "city kings time", "i join"};
-    private static final Logger LOGGER = LoggerFactory.getLogger(SlackBot.class);
-    private final String QUICKFIGHTSCRIPT="https://pastebin.adamoutler.com/C0B7";
-    private final String NOOBSCRIPT="https://pastebin.adamoutler.com/HxXW";
-    
-    
 
-    private User getUser(Event event){
-        UserResponse userResponse= new RestTemplate()
-                .getForEntity(slackApiEndpoints
-                        .getUserConnectApi()+"&user="+event.getUserId(), 
-                        UserResponse.class, slackToken)
-                .getBody();
-        return userResponse.getUser();
-    }
-    
-    
     /**
      * Slack token from application.properties file. You can get your slack
      * token next <a href="https://my.slack.com/services/new/bot">creating a new
@@ -86,95 +55,15 @@ public class SlackBot extends Bot {
      *
      * @param session
      * @param event
+     *
+     *
+     * general=C9T8G6RFZ
+     *
+     *
      */
     @Controller(events = {EventType.DIRECT_MENTION, EventType.DIRECT_MESSAGE})
     public void onReceiveDM(WebSocketSession session, Event event) {
-        User u=getUser(event);
-        System.out.println(u.getProfile().getRealName());
-        if (isMyOwnMessage(event)) {
-            return;
-        }
-
-        if (!event.getText().isEmpty()) {
-            if ( maybeDoTimeCommand(event, session) || maybeDoFlowchart(event, session) || maybeDoSource(event, session) || maybeGetQuote(event, session)|| maybeDoAlwaysWatching(event, session)||maybeDoNoobCommand(event,session)) {
-                System.out.println("done");
-            } else {
-                WebSocketMessage msg;
-                reply(session, event, "I don't understand.");
-            }
-        }
-    }
-
-    private boolean maybeGetQuote(Event event, WebSocketSession session) {
-        if (event.getText().toLowerCase().contains("inspir")) {
-            reply(session, event, getQuote());
-            return true;
-        }
-        return false;
-    }
-
-    public static String getQuote() {
-        String[] array = new String[]{"All warfare is based on deception.--Sun Tsu",
-            "The supreme art of war is to subdue the enemy without fighting.--Sun Tsu",
-            "Know thy self, know thy enemy. A thousand battles, a thousand victories.--Sun Tsu",
-            "If you know the enemy and know yourself you need not fear the results of a hundred battles.--Sun Tsu",
-            "Know your enemy and know yourself and you can fight a hundred battles without disaster.--Sun Tsu",
-            "Strategy without tactics is the slowest route to victory. Tactics without strategy is the noise before defeat.--Sun Tsu",
-            "Opportunities multiply as they are seized.--Sun Tsu",
-            "Victorious warriors win first and then go to war, while defeated warriors go to war first and then seek to win.--Sun Tsu",
-            "Hence to fight and conquer in all your battles is not supreme excellence; supreme excellence consists in breaking the enemy's resistance without fighting.--Sun Tsu",
-            "Pretend inferiority and encourage his arrogance.--Sun Tsu"};
-        int rnd = new Random().nextInt(array.length);
-        return array[rnd];
-    }
-
-    private boolean isMyOwnMessage(Event event) {
-        String user = SlackTools.getSlackUsername(event);
-        return user.equals(MYUSERID);
-    }
-
-    private boolean maybeDoTimeCommand(Event event, WebSocketSession session) {
-        for (String t : timeCommands) {
-            if (event.getText().toLowerCase().contains(t)) {
-                reply(session, event, CityKingsTime.getCityKingsTime());
-                return true;
-            }
-        }
-        return false;
-    }
-
-       private boolean maybeDoNoobCommand(Event event, WebSocketSession session) {
-        for (String t : timeCommands) {
-            if (event.getText().toLowerCase().contains("n00b")) {
-                reply(session, event, "Welcome to the gang.  I'm badazzes.org bot.  I have some helpful tips for you to pick up your game.");
-                reply(session, event, "This script will help you with automatic Quick Fights, and therefore Championship and Gang Fights on Android: "+this.QUICKFIGHTSCRIPT);
-                reply(session, event, "This script is used to display the message you saw when you came in this gang "+this.NOOBSCRIPT);
-                reply(session, event, "This is the City Kings flowchart "+this.FLOWCHARTURL);
-                reply(session, event, "Make sure to ask me directly before you click that JOIN button for a new round of City Kings.  You can say, '@badazzes.org should I join now?'.");
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    private boolean maybeDoFlowchart(Event event, WebSocketSession session) {
-
-        if (event.getText().toLowerCase().contains("flowchart")) {
-            reply(session, event, "Here's the current flowchart "+this.getUser(event).getProfile().getRealName()+"!" + FLOWCHARTURL);
-            return true;
-
-        }
-        return false;
-    }
-
-    private boolean maybeDoSource(Event event, WebSocketSession session) {
-
-        if (event.getText().toLowerCase().contains("source")) {
-            reply(session, event, this.getUser(event).getProfile().getRealName()+", my source code is here https://github.com/adamoutler/jbot.");
-            return true;
-
-        }
-        return false;
+        new Commands(this, slackApiEndpoints, slackToken).commandDistributor(session, event);
     }
 
     /**
@@ -188,6 +77,8 @@ public class SlackBot extends Bot {
      */
     @Controller(events = EventType.MESSAGE, pattern = "^([a-z ]{2})(\\d+)([a-z ]{2})$")
     public void onReceiveMessage(WebSocketSession session, Event event, Matcher matcher) {
+        Channel c = event.getChannel();
+        System.out.println(c);
 //        reply(session, event, "First group: " + matcher.group(0) + "\n"
 //                + "Second group: " + matcher.group(1) + "\n"
 //                + "Third group: " + matcher.group(2) + "\n"
@@ -202,7 +93,7 @@ public class SlackBot extends Bot {
      */
     @Controller(events = EventType.PIN_ADDED)
     public void onPinAdded(WebSocketSession session, Event event) {
-        reply(session, event, "Thanks for the pin "+this.getUser(event).getProfile().getRealName()+"! You can find all pinned items under channel details.");
+        reply(session, event, "Thanks for the pin " + new Commands(this, slackApiEndpoints, slackToken).getUser(event).getProfile().getRealName() + "! You can find all pinned items under channel details.");
     }
 
     /**
@@ -283,22 +174,6 @@ public class SlackBot extends Bot {
 //            reply(session, event, "Okay, don't forget to attend the meeting tomorrow :)");
 //        }
 //        stopConversation(event);    // stop conversation
-    }
-
-    private boolean maybeDoAlwaysWatching(Event event, WebSocketSession session) {
-
-        if (event.getText().toLowerCase().contains("always watching")) {
-
-            reply(session, event, "I may be pretty quiet, but I'm always here and see everything going on at all times.  I could react to any message, but I choose not to. I'm always watching everything.  always...");
-            try {
-                Thread.sleep(30000);
-            } catch (InterruptedException ex) {
-                java.util.logging.Logger.getLogger(SlackBot.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            reply(session, event, "...literally always "+this.getUser(event).getProfile().getRealName()+".");
-            return true;
-        }
-        return false;
     }
 
 }

@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.adamoutler.catstools;
+package com.adamoutler.slacktools.datatypes;
 
-import me.ramswaroop.jbot.core.slack.models.User;
+
 
 /**
  *
@@ -14,7 +14,7 @@ import me.ramswaroop.jbot.core.slack.models.User;
 public class UserResponse {
 
     private boolean ok;
-    private User user;
+    private UserExt user;
 
     /**
      * @return the ok
@@ -26,7 +26,7 @@ public class UserResponse {
     /**
      * @return the user
      */
-    public User getUser() {
+    public UserExt getUser() {
         return user;
     }
 }
