@@ -12,10 +12,13 @@ import com.adamoutler.slacktools.datatypes.UserPresence;
 import com.adamoutler.slacktools.datatypes.UserResponse;
 import com.adamoutler.time.CityKingsTime;
 import example.jbot.slack.SlackBot;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import me.ramswaroop.jbot.core.slack.Bot;
@@ -65,20 +68,23 @@ public class Commands {
         MemberTimeIndicators(String timezoneName, float timezoneOffsetInSeconds, String presence, String realName) {
             this.timezoneName = timezoneName;
             this.timezoneOffsetInSeconds = timezoneOffsetInSeconds;
-            this.online=online;
-            this.presence=presence;
-            this.realName=realName;
+            this.online = online;
+            this.presence = presence;
+            this.realName = realName;
         }
 
-        public String getName(){
+        public String getName() {
             return realName;
         }
-        public boolean getOnline(){
+
+        public boolean getOnline() {
             return online;
         }
-        public String getPresence(){
+
+        public String getPresence() {
             return presence;
         }
+
         public String getKey() {
             return timezoneName;
         }
@@ -111,7 +117,14 @@ public class Commands {
     }
 
     private boolean maybeGetUserTimezoneAverage(Event event, WebSocketSession session) {
-        if (!event.getText().toLowerCase().contains("user status")) {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+        Date now = new Date();
+        SimpleDateFormat dateFormatLocal = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
+
+        long userTime = now.getTime();
+
+        if (!event.getText().toLowerCase().contains("user status")&& !event.getText().toLowerCase().contains("times")) {
             return false;
         }
 
@@ -125,10 +138,10 @@ public class Commands {
 
         this.getChannels(event).stream().filter((channel) -> (channel.getName().toLowerCase().equals("general"))).forEachOrdered((channel) -> {
             channel.getUsers(slackApiEndpoints, slackToken).forEach((user) -> {
-                if (!user.isDeleted()&& !user.isIs_bot()) {
-                    String username=user.getProfile().getDisplay_name().isEmpty()?user.getProfile().getRealName():user.getProfile().getDisplay_name();
+                if (!user.isDeleted() && !user.isIs_bot()) {
+                    String username = user.getProfile().getDisplay_name().isEmpty() ? user.getProfile().getRealName() : user.getProfile().getDisplay_name();
                     timezones.get(12 + (int) Math.floor(user.getTz_offset() / 60 / 60))
-                            .add(new MemberTimeIndicators(user.getTz_label(), user.getTz_offset(),Integer.toString(user.getPresence().getLast_activity()),username));
+                            .add(new MemberTimeIndicators(user.getTz_label(), user.getTz_offset(), Integer.toString(user.getPresence().getLast_activity()), username));
                 }
             });
         });
@@ -136,18 +149,25 @@ public class Commands {
         StringBuilder sb = new StringBuilder();
         Averaging averaging = new Averaging();
         timezones.stream().filter((memberTimes) -> (memberTimes.size() > 0)).map((memberTimes) -> {
+            String time = "";
+            long timeAdjusted = (long) Math.abs(userTime + (int) memberTimes.get(0).getValue()*1000);
+            Date adjustedDate = new Date(timeAdjusted);
+
+            time = sdf.format(adjustedDate);
+
             int gmt = (int) memberTimes.get(0).timezoneOffsetInSeconds / 60 / 60;
             String gmtValue;
             if (gmt > 0) {
                 gmtValue = "+" + Integer.toString(gmt);
             } else {
-                gmtValue = Integer.toString(gmt); 
+                gmtValue = Integer.toString(gmt);
             }
-            StringBuilder memberMessage=new StringBuilder();
-            for (MemberTimeIndicators ind:memberTimes){
+            StringBuilder memberMessage = new StringBuilder();
+            for (MemberTimeIndicators ind : memberTimes) {
                 memberMessage.append(" - ").append(ind.getName());
             }
-            slackBot.reply(session, event, memberTimes.size() + " members in " + memberTimes.get(0).getKey() + " GMT" + gmtValue +"  "+memberMessage.toString());
+
+            slackBot.reply(session, event, memberTimes.size() + " members in " + memberTimes.get(0).getKey() + " GMT" + gmtValue + " ("+time+")  " + memberMessage.toString());
             return memberTimes;
         }).filter((memberTimes) -> (memberTimes.size() > 2)).forEachOrdered((memberTimes) -> {
             memberTimes.forEach((kvp) -> {
@@ -241,7 +261,7 @@ public class Commands {
     public User getUser(String userid) {
         UserResponse userResponse = new RestTemplate().getForEntity(slackApiEndpoints.getUserInfoAPI() + "&user=" + userid, UserResponse.class, slackToken).getBody();
         userResponse.getUser().setPresence(getUserPresence(userid));
-        
+
         return userResponse.getUser();
     }
 
