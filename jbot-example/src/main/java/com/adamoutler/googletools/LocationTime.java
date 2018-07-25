@@ -25,7 +25,6 @@ import org.springframework.web.socket.WebSocketSession;
  */
 public class LocationTime {
 
-
     public static DetailsResult getLocation(String location, String apiKey) {
         String locationRequest = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json"
                 + "?key=" + apiKey
@@ -49,14 +48,13 @@ public class LocationTime {
 
     public static boolean getDetails(String apiKey, Event event, WebSocketSession session, SlackBot slackBot) {
         if (!isTimeExtractionCommand(event.getText())) {
-           return false;
+            return false;
         }
         int index = event.getText().indexOf(check);
         String area = event.getText().substring(index + check.length());
 
         try {
             DetailsResult dr = getLocation(area, apiKey);
-
             slackBot.reply(session, event, "It is " + dr.getCurrentTime() + " in " + dr.getLongName() + "(" + dr.getShortName() + ").");
 
         } catch (Exception ex) {
@@ -72,5 +70,4 @@ public class LocationTime {
         return value.toLowerCase().contains(check);
     }
 
-   
 }
