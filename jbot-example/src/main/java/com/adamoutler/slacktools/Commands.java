@@ -188,7 +188,7 @@ public class Commands {
         int rnd = new Random().nextInt(array.length);
         return array[rnd];
     }
-    private final String NOOBSCRIPT = "https://pastebin.adamoutler.com/HxXW";
+    private final String NOOBSCRIPT = "https://pastebin.adamoutler.com/EpVo";
     private final String QUICKFIGHTSCRIPT = "https://pastebin.adamoutler.com/C0B7";
     String[] timeCommands = new String[]{"we join", "city kings time", "i join"};
     final String FLOWCHARTURL = "https://badazzes.slack.com/files/U9S44RGNP/FBN4T7TAA/image.png";
