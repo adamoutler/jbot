@@ -109,7 +109,8 @@ public class Commands {
                     || maybeDoAlwaysWatching(event, session)
                     || maybeDoNoobCommand(event, session)
                     || maybeGetUserTimezoneAverage(event, session)
-                    || LocationTime.getDetails(slackApiEndpoints.getGoogleToken(), event, session, slackBot))
+                    || LocationTime.getDetails(slackApiEndpoints.getGoogleToken(), event, session, slackBot)
+                    ||maybeDoAdam(event,session))
             {
 
             } else {
@@ -118,6 +119,7 @@ public class Commands {
         }
 
     }
+    
 
     private boolean maybeGetUserTimezoneAverage(Event event, WebSocketSession session) {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
@@ -209,7 +211,14 @@ public class Commands {
         }
         return false;
     }
-
+    public boolean maybeDoAdam(Event event, WebSocketSession session) {
+        if (event.getText().toLowerCase().contains("who is adam")) {
+            slackBot.reply(session, event, "Adam is my creator. He hacks phones for a living. He has a social media page at google.com/+AdamOutler. He tries to tell me dad jokes, but... ");
+            slackBot.reply(session, event, "I don't understand");
+            return true;
+        }
+        return false;
+    }
     public boolean maybeDoTimeCommand(Event event, WebSocketSession session) {
         for (String t : timeCommands) {
             if (event.getText().toLowerCase().contains(t)) {
