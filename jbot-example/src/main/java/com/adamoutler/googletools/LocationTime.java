@@ -20,7 +20,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
- * https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=Germany&inputtype=textquery&fields=geometry,id,name,place_id,plus_code&key=AIzaSyCB8Xw_NbB7xOh9TMSYv_OIV_lziSJf18g
  *
  * @author adamo
  */
