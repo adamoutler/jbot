@@ -12,6 +12,9 @@ public class SlackApiEndpoints {
     @Value("${slackApi}")
     private String slackApi;
 
+    @Value("${googleApi}")
+    private String googleApiToken;
+
     /**
      * @return endpoint for RTM.connect()
      */
@@ -30,9 +33,13 @@ public class SlackApiEndpoints {
     public String getChannelListApi() {
         return slackApi + "/channels.list?token={token}";
     }
-    
 
-        public String getUserPresenceApi(){
-        return slackApi+"/users.getPresence?token={token}";
+    public String getUserPresenceApi() {
+        return slackApi + "/users.getPresence?token={token}";
     }
+
+    public String getGoogleToken() {
+        return googleApiToken;
+    }
+
 }
