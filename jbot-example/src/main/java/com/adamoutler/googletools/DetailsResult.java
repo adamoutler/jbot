@@ -5,11 +5,8 @@
  */
 package com.adamoutler.googletools;
 
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
+import com.adamoutler.time.UserTimeCalculator;
+
 
 /**
  *
@@ -32,15 +29,12 @@ public class DetailsResult {
     
     public String getCurrentTime(){
         
-        long utc= Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis();
-        long offset=getUtcOffset()*60*1000;
-        long time= utc+ offset;
-        
-        SimpleDateFormat sdf=new SimpleDateFormat("ddMMMYY HH:mm.ss");
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return sdf.format(new Date(time));
+        long offset=getUtcOffset();
+        String curDate=UserTimeCalculator.calculateUTCTimeWithOffset(offset);
+        return curDate;
         
     }
+
     
 
     public String getShortName() {

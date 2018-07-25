@@ -6,8 +6,13 @@
 package com.adamoutler.time;
 
 import com.adamoutler.slacktools.datatypes.UserExt;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  *
@@ -15,24 +20,34 @@ import java.util.List;
  */
 public class UserTimeCalculator {
 
+    public static String calculateUTCTimeWithOffset(long offset) {
+        long msOffset = offset * 60 * 1000;
+        long utc = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis();
+        long time = utc + offset;
+        SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm.ss");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String curDate = sdf.format(new Date(time));
+        return curDate;
+    }
+
     public double calculateUserTime(List<UserExt> users) {
         ArrayList<Integer> times = new ArrayList<>();
-        for (UserExt user : users) {
+        users.forEach((user) -> {
             times.add(user.getTz_offset());
-        }
+        });
         return calculateAverage(times);
     }
-    
-private double calculateAverage(List <Integer> marks) {
-  Integer sum = 0;
-  if(!marks.isEmpty()) {
-    for (Integer mark : marks) {
-        sum += mark;
-    }
-    return sum.doubleValue() / marks.size();
-  }
-  return sum;
-}
- 
-}
 
+    private double calculateAverage(List<Integer> marks) {
+        Integer sum = 0;
+        if (!marks.isEmpty()) {
+            for (Iterator<Integer> it = marks.iterator(); it.hasNext();) {
+                Integer mark = it.next();
+                sum += mark;
+            }
+            return sum.doubleValue() / marks.size();
+        }
+        return sum;
+    }
+
+}

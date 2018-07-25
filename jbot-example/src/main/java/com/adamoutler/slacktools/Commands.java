@@ -16,7 +16,9 @@ import example.jbot.slack.SlackBot;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.TimeZone;
@@ -69,7 +71,6 @@ public class Commands {
         MemberTimeIndicators(String timezoneName, float timezoneOffsetInSeconds, String presence, String realName) {
             this.timezoneName = timezoneName;
             this.timezoneOffsetInSeconds = timezoneOffsetInSeconds;
-            this.online = online;
             this.presence = presence;
             this.realName = realName;
         }
@@ -125,7 +126,9 @@ public class Commands {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
         Date now = new Date();
-        SimpleDateFormat dateFormatLocal = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
+        SimpleDateFormat dateFormatLocal = new SimpleDateFormat("HH:mm:ss");
+        final CounterObject totalMembers=new CounterObject();
+        final CounterObject totalAwake=new CounterObject();
 
         long userTime = now.getTime();
 
@@ -133,21 +136,11 @@ public class Commands {
             return false;
         }
 
-        ArrayList<ArrayList<MemberTimeIndicators>> timezones = new ArrayList<>();
-
-
-        for (int i = 0; i < 25; i++) {
-            timezones.add(new ArrayList<>());
-        }
+        ArrayList<ArrayList<MemberTimeIndicators>> timezones = create24TimeZones();
+        ;
 
         this.getChannels(event).stream().filter((channel) -> (channel.getName().toLowerCase().equals("general"))).forEachOrdered((channel) -> {
-            channel.getUsers(slackApiEndpoints, slackToken).forEach((user) -> {
-                if (!user.isDeleted() && !user.isIs_bot()) {
-                    String username = user.getProfile().getDisplay_name().isEmpty() ? user.getProfile().getRealName() : user.getProfile().getDisplay_name();
-                    timezones.get(12 + (int) Math.floor(user.getTz_offset() / 60 / 60))
-                            .add(new MemberTimeIndicators(user.getTz_label(), user.getTz_offset(), Integer.toString(user.getPresence().getLast_activity()), username));
-                }
-            });
+            putUsersInTimeZones(channel,timezones);
         });
 
         StringBuilder sb = new StringBuilder();
@@ -156,31 +149,76 @@ public class Commands {
             String time = "";
             long timeAdjusted = (long) Math.abs(userTime + (int) memberTimes.get(0).getValue()*1000);
             Date adjustedDate = new Date(timeAdjusted);
-
+            int hour=getCurrentHour(adjustedDate);
             time = sdf.format(adjustedDate);
-
             int gmt = (int) memberTimes.get(0).timezoneOffsetInSeconds / 60 / 60;
-            String gmtValue;
-            if (gmt > 0) {
-                gmtValue = "+" + Integer.toString(gmt);
-            } else {
-                gmtValue = Integer.toString(gmt);
-            }
+            String gmtValue = setPlusMinusGmtSign(gmt);
             StringBuilder memberMessage = new StringBuilder();
-            for (MemberTimeIndicators ind : memberTimes) {
+            int members=0;
+            int awake=0;
+            for (MemberTimeIndicators ind:memberTimes) {
                 memberMessage.append(" - ").append(ind.getName());
-            }
+                members++;
+                awake = checkProbablyAwake(hour, awake);
+            };
+            totalAwake.add(awake);
+            totalMembers.add(members);
 
             slackBot.reply(session, event, memberTimes.size() + " members in " + memberTimes.get(0).getKey() + " GMT" + gmtValue + " ("+time+")  " + memberMessage.toString());
             return memberTimes;
         }).filter((memberTimes) -> (memberTimes.size() > 2)).forEachOrdered((memberTimes) -> {
-            memberTimes.forEach((kvp) -> {
-                averaging.add(kvp.timezoneOffsetInSeconds);
-            });
+            averageAllTimes(memberTimes, averaging);
         });
 
-        slackBot.reply(session, event, sb.toString() + "\nExcluding the 1's and 2's, the mean-average Badazzes member is located in GMT " + averaging.getAverage() / 60 / 60);
+        String avgTime=sdf.format(new Date(userTime+(long)(averaging.getAverage()*1000)));
+        slackBot.reply(session, event, sb.toString() + "\nExcluding the 1's and 2's, the mean-average Badazzes member is located in GMT " + averaging.getAverage() / 60 / 60+". Mean-average Badazzes group local time is "+avgTime+". We have "+totalMembers.get() +" warriors in chat which command "+ totalMembers.get()*3 +" cars. Due to Time Zones, we likely have "+ totalAwake.get()+" members awake and "+(totalMembers.get()-totalAwake.get())+" asleep, which makes a total of "+ totalAwake.get()*3 +" cars." );
         return true;
+    }
+
+    public ArrayList<ArrayList<MemberTimeIndicators>> create24TimeZones() {
+        ArrayList<ArrayList<MemberTimeIndicators>> timezones = new ArrayList<>();
+        for (int i = 0; i < 25; i++) {
+            timezones.add(new ArrayList<>());
+        }
+        return timezones;
+    }
+
+    public void putUsersInTimeZones(ChannelExt channel, ArrayList<ArrayList<MemberTimeIndicators>> timezones) {
+        channel.getUsers(slackApiEndpoints, slackToken).forEach((user) -> {
+            if (!user.isDeleted() && !user.isIs_bot()) {
+                timezones.get(12 + (int) Math.floor(user.getTz_offset() / 60 / 60)).add(new MemberTimeIndicators(user.getTz_label(), user.getTz_offset(), Integer.toString(user.getPresence().getLast_activity()), user.getProfile().getDisplay_name().isEmpty() ? user.getProfile().getRealName() : user.getProfile().getDisplay_name()));
+            }
+        });
+    }
+
+    public void averageAllTimes(ArrayList<MemberTimeIndicators> memberTimes, Averaging averaging) {
+        memberTimes.forEach((kvp) -> {
+            averaging.add(kvp.timezoneOffsetInSeconds);
+        });
+    }
+
+    public int getCurrentHour(Date adjustedDate) {
+        Calendar calendar=GregorianCalendar.getInstance();
+        calendar.setTime(adjustedDate);
+        int hour=calendar.get(Calendar.HOUR_OF_DAY);
+        return hour;
+    }
+
+    public String setPlusMinusGmtSign(int gmt) {
+        String gmtValue;
+        if (gmt > 0) {
+            gmtValue = "+" + Integer.toString(gmt);
+        } else {
+            gmtValue = Integer.toString(gmt);
+        }
+        return gmtValue;
+    }
+
+    public int checkProbablyAwake(int hour, int awake) {
+        if (6<hour&&hour<22){
+            awake++;
+        }
+        return awake;
     }
 
     public static String getQuote() {
