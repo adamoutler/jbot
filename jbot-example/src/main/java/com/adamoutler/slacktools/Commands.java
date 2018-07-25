@@ -5,6 +5,7 @@
  */
 package com.adamoutler.slacktools;
 
+import com.adamoutler.googletools.LocationTime;
 import com.adamoutler.slacktools.datatypes.ChannelExt;
 import com.adamoutler.slacktools.datatypes.ChannelResponse;
 import com.adamoutler.slacktools.datatypes.UserExt;
@@ -107,7 +108,9 @@ public class Commands {
                     || maybeGetQuote(event, session)
                     || maybeDoAlwaysWatching(event, session)
                     || maybeDoNoobCommand(event, session)
-                    || maybeGetUserTimezoneAverage(event, session)) {
+                    || maybeGetUserTimezoneAverage(event, session)
+                    || LocationTime.getDetails(slackApiEndpoints.getGoogleToken(), event, session, slackBot))
+            {
 
             } else {
                 slackBot.reply(session, event, "I don't understand.");
@@ -130,7 +133,6 @@ public class Commands {
 
         ArrayList<ArrayList<MemberTimeIndicators>> timezones = new ArrayList<>();
 
-        slackBot.reply(session, event, "Give me a minute... Communicating with Slack's Channel List, Channel Info, User List, and User Info APIs and calculating for #General.  This takes some time to compile the information.");
 
         for (int i = 0; i < 25; i++) {
             timezones.add(new ArrayList<>());
