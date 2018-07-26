@@ -129,7 +129,7 @@ public class Commands {
         SimpleDateFormat dateFormatLocal = new SimpleDateFormat("HH:mm:ss");
         final CounterObject totalMembers=new CounterObject();
         final CounterObject totalAwake=new CounterObject();
-
+        
         long userTime = now.getTime();
 
         if (!event.getText().toLowerCase().contains("user status")&& !event.getText().toLowerCase().contains("times")) {
@@ -146,11 +146,10 @@ public class Commands {
         StringBuilder sb = new StringBuilder();
         Averaging averaging = new Averaging();
         timezones.stream().filter((memberTimes) -> (memberTimes.size() > 0)).map((memberTimes) -> {
-            String time = "";
-            long timeAdjusted = (long) Math.abs(userTime + (int) memberTimes.get(0).getValue()*1000);
+            long timeAdjusted = (long) Math.abs(userTime + ((int) memberTimes.get(0).getValue()*1000));
             Date adjustedDate = new Date(timeAdjusted);
             int hour=getCurrentHour(adjustedDate);
-            time = sdf.format(adjustedDate);
+            String time = sdf.format(adjustedDate);
             int gmt = (int) memberTimes.get(0).timezoneOffsetInSeconds / 60 / 60;
             String gmtValue = setPlusMinusGmtSign(gmt);
             StringBuilder memberMessage = new StringBuilder();
@@ -200,6 +199,7 @@ public class Commands {
     public int getCurrentHour(Date adjustedDate) {
         Calendar calendar=GregorianCalendar.getInstance();
         calendar.setTime(adjustedDate);
+        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
         int hour=calendar.get(Calendar.HOUR_OF_DAY);
         return hour;
     }
