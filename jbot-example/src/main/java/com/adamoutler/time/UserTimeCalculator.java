@@ -23,7 +23,7 @@ public class UserTimeCalculator {
     public static String calculateUTCTimeWithOffset(long offset) {
         long msOffset = offset * 60 * 1000;
         long utc = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis();
-        long time = utc + offset;
+        long time = utc + msOffset;
         SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm.ss");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         String curDate = sdf.format(new Date(time));
